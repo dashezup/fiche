@@ -33,6 +33,8 @@ content="Upload your pastes through netcat/bash/zsh - https://ezup.dev/p" />
 <meta property="og:image" content="preview.png" />
 <meta property="og:image:width" content="{width}">
 <meta property="og:image:height" content="{height}">
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:dnt" content="on"/>
 <link rel="stylesheet" href="../styles.css" type="text/css" />
 </head>
 {code_html}
