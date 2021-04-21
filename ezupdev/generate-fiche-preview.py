@@ -4,14 +4,15 @@ requirements.txt:
 - Pillow
 - Pygments
 """
-import os
-import asyncio
 import argparse
+import asyncio
+import os
 import subprocess
+
 from PIL import Image
 from pygments import highlight
-from pygments.lexers import guess_lexer
 from pygments.formatters import HtmlFormatter, ImageFormatter
+from pygments.lexers import guess_lexer
 
 DOC_HTML = '''\
 <!DOCTYPE html>
@@ -42,10 +43,20 @@ async def generate_html_and_png(fiche_dir, fiche_id):
     txt = os.path.join(fiche_paste, 'index.txt')
     html = os.path.join(fiche_paste, 'index.html')
     png = os.path.join(fiche_paste, 'preview.png')
-    with open(txt) as f_txt, open(png, 'wb') as f_png:
+    if os.path.getsize(txt) > 393216:
+        return
+    with open(txt) as f_txt:
         code = f_txt.read()
-        preview_code = "\n".join(code.split('\n')[:79])
         lexer = guess_lexer(code)
+    preview_code = ''
+    with open(txt) as f:
+        try:
+            for x in range(79):
+                line = next(f)
+                preview_code += line[:133] + (line[133:] and '...\n')
+        except StopIteration:
+            pass
+    with open(png, 'wb') as f_png:
         image_formatter = ImageFormatter(
             font_name="Fira Mono",
             line_number_bg="#073642",
@@ -53,8 +64,9 @@ async def generate_html_and_png(fiche_dir, fiche_id):
             style="solarized-dark"
         )
         f_png.write(highlight(preview_code, lexer, image_formatter))
-    with open(html, 'w') as f_html, Image.open(png) as im:
+    with Image.open(png) as im:
         width, height = im.size
+    with open(html, 'w') as f_html:
         formatter = HtmlFormatter(linenos=True, full=False, style="stata-dark")
         code_html = highlight(code, lexer, formatter)
         full_html = DOC_HTML.format(
@@ -91,6 +103,5 @@ if __name__ == "__main__":
     )
     parser.add_argument('dir', help="fiche output directory")
     parser.add_argument('log', help="fiche log file")
-    args = parser.parse_args()
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(args))
+    loop.run_until_complete(main(parser.parse_args()))
