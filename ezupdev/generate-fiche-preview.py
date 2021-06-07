@@ -31,7 +31,7 @@ content="Upload your pastes through netcat/bash/zsh - https://ezup.dev/p" />
 <link rel="stylesheet" href="../styles.css" type="text/css" />
 </head>
 <body>
-<h2>&gt; <a href="../">ezpaste</a>: {fiche_id}</h2>
+<h2>&gt; <a href="../">ezpaste</a>: {fiche_id} - <a href="index.txt">raw</a></h2>
 {code_html}
 </body>
 </html>
