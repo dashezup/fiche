@@ -31,11 +31,14 @@ content="Upload your pastes through netcat/bash/zsh - https://ezup.dev/p" />
 <link rel="stylesheet" href="../styles.css" type="text/css" />
 </head>
 <body>
-<h2>&gt; <a href="../">ezpaste</a>: {fiche_id} - <a href="index.txt">raw</a></h2>
+<h2>&gt; \
+<a href="../">ezpaste</a>: {fiche_id} - <a href="index.txt">raw</a></h2>
 {code_html}
 </body>
-</html>
-'''
+</html>'''
+PREVIEW_MAX_LINES = 79
+PREVIEW_MAX_LENGTH = 133
+MAX_FOR_GEN = 24 * 1024
 
 
 async def generate_html_and_png(fiche_dir, fiche_id):
@@ -43,7 +46,8 @@ async def generate_html_and_png(fiche_dir, fiche_id):
     txt = os.path.join(fiche_paste, 'index.txt')
     html = os.path.join(fiche_paste, 'index.html')
     png = os.path.join(fiche_paste, 'preview.png')
-    if os.path.getsize(txt) > 393216:
+    paste_size = os.path.getsize(txt)
+    if paste_size > MAX_FOR_GEN:
         return
     with open(txt) as f_txt:
         code = f_txt.read()
@@ -51,9 +55,12 @@ async def generate_html_and_png(fiche_dir, fiche_id):
     preview_code = ''
     with open(txt) as f:
         try:
-            for x in range(79):
+            for x in range(PREVIEW_MAX_LINES):
                 line = next(f)
-                preview_code += line[:133] + (line[133:] and '...\n')
+                preview_code += (
+                    line[:PREVIEW_MAX_LENGTH]
+                    + (line[PREVIEW_MAX_LENGTH:] and '...\n')
+                )
         except StopIteration:
             pass
     with open(png, 'wb') as f_png:
